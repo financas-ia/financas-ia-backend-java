@@ -9,6 +9,21 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: FINANCAS
+          POSTGRES_PASSWORD: FINANCAS_P
+          POSTGRES_DB: FINANCAS_BD
+        ports:
+          - 5434:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -24,4 +39,9 @@ jobs:
         run: chmod +x mvnw
 
       - name: Build with Maven
-        run: ./mvnw clean verify
+        env:
+          DB_URL: jdbc:postgresql://localhost:5434/FINANCAS_BD
+          DB_USER: FINANCAS
+          DB_PASS: FINANCAS_P
+          SPRING_AI_GOOGLE_GENAI_API_KEY: ${{ secrets.SPRING_AI_GOOGLE_GENAI_API_KEY }}
+        run: ./mvnw clean verify -e
