@@ -54,7 +54,7 @@ public class User implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private RoleUser role;
+    private RoleUser role = RoleUser.USER;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
