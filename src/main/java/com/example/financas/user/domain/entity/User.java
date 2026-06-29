@@ -14,6 +14,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -55,6 +56,13 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private RoleUser role = RoleUser.USER;
+
+    @Column(nullable = false)
+    private boolean isTwoFactorEnabled = false;
+
+    private String twoFactorCode;
+
+    private Instant twoFactorCodeExpiresAt;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
