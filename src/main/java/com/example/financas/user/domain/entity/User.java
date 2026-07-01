@@ -57,12 +57,8 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private RoleUser role = RoleUser.USER;
 
-    @Column(nullable = false)
-    private boolean isTwoFactorEnabled = false;
-
-    private String twoFactorCode;
-
-    private Instant twoFactorCodeExpiresAt;
+    @Column(name = "two_factor_enabled", nullable = false)
+    private boolean twoFactorEnabled = false;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
