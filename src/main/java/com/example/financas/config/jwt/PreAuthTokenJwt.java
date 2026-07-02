@@ -15,7 +15,7 @@ import java.time.ZoneOffset;
 @Service
 public class PreAuthTokenJwt {
 
-    @Value("${api.security.token.preauth}")
+    @Value("${api.security.preauth.token}")
     private String preAuthToken;
 
     public String generatePreAuthToken(String email) {

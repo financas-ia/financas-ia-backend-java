@@ -8,6 +8,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface TwoFactorCodeRepository extends JpaRepository<TwoFactorCode, Long> {
-    Optional<TwoFactorCode> findByCodeAndUserAndIsValidTrue(String code, User user);
-    List<TwoFactorCode> findByUserAndIsValidTrue(User user);
+    Optional<TwoFactorCode> findByCodeAndUserAndValidTrue(String code, User user);
+    List<TwoFactorCode> findByUserAndValidTrue(User user);
 }

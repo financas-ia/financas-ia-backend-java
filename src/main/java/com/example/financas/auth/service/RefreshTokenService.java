@@ -32,7 +32,7 @@ public class RefreshTokenService {
     }
 
     public void invalidRefreshToken(User user) {
-        List<RefreshToken>invalidsTokens = this.refreshTokenRepository.findByUserAndIsValidTrue(user);
+        List<RefreshToken>invalidsTokens = this.refreshTokenRepository.findByUserAndValidTrue(user);
         invalidsTokens.forEach(c -> c.setValid(false));
         this.refreshTokenRepository.saveAll(invalidsTokens);
     }

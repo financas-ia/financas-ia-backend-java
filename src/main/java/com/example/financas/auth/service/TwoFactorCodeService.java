@@ -39,7 +39,7 @@ public class TwoFactorCodeService {
     }
 
     public void SaveTwoFactorCode(User user, String code) {
-        List<TwoFactorCode>existingCodes = this.twoFactorCodeRepository.findByUserAndIsValidTrue(user);
+        List<TwoFactorCode>existingCodes = this.twoFactorCodeRepository.findByUserAndValidTrue(user);
         existingCodes.forEach(c -> c.setValid(false));
         this.twoFactorCodeRepository.saveAll(existingCodes);
 
@@ -53,7 +53,7 @@ public class TwoFactorCodeService {
     }
 
     public boolean validTwoFactorCode(User user, String code) {
-        Optional<TwoFactorCode>twoFactorCode = this.twoFactorCodeRepository.findByCodeAndUserAndIsValidTrue(code, user);
+        Optional<TwoFactorCode>twoFactorCode = this.twoFactorCodeRepository.findByCodeAndUserAndValidTrue(code, user);
         if (twoFactorCode.isEmpty()) {
             throw new NotFoundException("Not Found or Invalid Two Factor Code");
         }
