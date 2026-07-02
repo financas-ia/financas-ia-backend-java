@@ -4,10 +4,14 @@ import jakarta.validation.constraints.NotBlank;
 
 public record LoginResponseDTO(
         @NotBlank
-        String token
+        String acessToken,
+
+        @NotBlank
+        String refreshToken
 ) {
 
-    public LoginResponseDTO(String token) {
-        this.token = token;
+    public LoginResponseDTO(String acessToken, String refreshToken) {
+        this.acessToken = acessToken;
+        this.refreshToken = refreshToken;
     }
 }

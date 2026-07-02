@@ -2,11 +2,8 @@ package com.example.financas.auth.entity.dto;
 
 import jakarta.validation.constraints.NotBlank;
 
-public record TwoFactorDTO (
+public record RefreshTokenRequestDTO (
         @NotBlank
-        String code
+        String refreshToken
 ) {
-    public TwoFactorDTO(String code) {
-        this.code = code;
-    }
 }

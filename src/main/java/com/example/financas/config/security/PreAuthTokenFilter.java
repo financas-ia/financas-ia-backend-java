@@ -1,5 +1,6 @@
-package com.example.financas.config;
+package com.example.financas.config.security;
 
+import com.example.financas.config.jwt.PreAuthTokenJwt;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,17 +13,17 @@ import java.io.IOException;
 @Component
 public class PreAuthTokenFilter extends OncePerRequestFilter {
 
-    private final PreAuthTokenService preAuthTokenService;
+    private final PreAuthTokenJwt preAuthTokenJwt;
 
-    public PreAuthTokenFilter(PreAuthTokenService preAuthTokenService) {
-        this.preAuthTokenService = preAuthTokenService;
+    public PreAuthTokenFilter(PreAuthTokenJwt preAuthTokenJwt) {
+        this.preAuthTokenJwt = preAuthTokenJwt;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         var token = this.recoverToken(request);
         if (token != null) {
-            var email = preAuthTokenService.validatePreAuthToken(token);
+            var email = preAuthTokenJwt.validatePreAuthToken(token);
             if (email != null) {
                 request.setAttribute("preAuthEmail", email);
             }

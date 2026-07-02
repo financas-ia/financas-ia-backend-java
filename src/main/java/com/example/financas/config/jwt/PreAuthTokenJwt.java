@@ -1,4 +1,4 @@
-package com.example.financas.config;
+package com.example.financas.config.jwt;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
 @Service
-public class PreAuthTokenService {
+public class PreAuthTokenJwt {
 
     @Value("${api.security.token.preauth}")
     private String preAuthToken;
