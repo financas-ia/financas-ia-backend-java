@@ -56,7 +56,7 @@ class UserServiceTest {
         user.setPassword("encodedPassword");
 
         when(userRepository.existsBycpf(createUserDTO.cpf())).thenReturn(false);
-        when(userRepository.existsByemail(createUserDTO.email())).thenReturn(false);
+        when(userRepository.existsByEmail(createUserDTO.email())).thenReturn(false);
         when(passwordEncoder.encode(createUserDTO.password())).thenReturn("encodedPassword");
         when(userRepository.save(any(User.class))).thenReturn(user);
 
@@ -82,7 +82,7 @@ class UserServiceTest {
                 "123456789"
         );
 
-        when(userRepository.existsByemail(createUserDTO.email())).thenReturn(true);
+        when(userRepository.existsByEmail(createUserDTO.email())).thenReturn(true);
 
         // Act & Assert
         ConflictException exception = assertThrows(ConflictException.class, () -> userService.createUser(createUserDTO));
