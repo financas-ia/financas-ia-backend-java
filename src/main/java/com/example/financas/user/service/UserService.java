@@ -35,6 +35,7 @@ public class UserService {
         user.setName(createUserDTO.name());
         user.setDateOfBirth(createUserDTO.dateOfBirth());
         user.setPhoneNumber(createUserDTO.phoneNumber());
+        user.setTwoFactorEnabled(false);
         String bcryptPassword = this.passwordEncoder.encode(createUserDTO.password());
         user.setPassword(bcryptPassword);
 
