@@ -1,5 +1,6 @@
 package com.example.financas.exceptions;
 
+import com.example.financas.exceptions.dto.ForbiddenException;
 import com.example.financas.exceptions.dto.RestErrorMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,5 +23,11 @@ public class RestExceptionHandle extends ResponseEntityExceptionHandler {
     private ResponseEntity<RestErrorMessage> conflictException(ConflictException ex) {
         RestErrorMessage threatResponse = new RestErrorMessage(HttpStatus.CONFLICT, ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(threatResponse);
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    private ResponseEntity<RestErrorMessage> forbiddenException(ForbiddenException ex) {
+        RestErrorMessage threatResponse = new RestErrorMessage(HttpStatus.FORBIDDEN, ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(threatResponse);
     }
 }
