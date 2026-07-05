@@ -22,4 +22,15 @@ public class MailService {
         mailSender.send(message);
     }
 
+    public void sendResetPasswordEmail(String toEmail, String token) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom("suporte@financas.com");
+        message.setTo(toEmail);
+        message.setSubject("Redefinição de Senha - Finanças");
+        message.setText("Você solicitou a redefinição de senha. Acesse o link abaixo para redefinir sua senha:\n\n" +
+                "http://localhost:8080/auth/reset-password?token=" + token + "\n\n" +
+                "Este link é válido por 10 minutos.");
+        mailSender.send(message);
+    }
+
 }

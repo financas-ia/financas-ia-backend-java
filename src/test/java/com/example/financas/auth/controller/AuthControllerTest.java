@@ -1,9 +1,6 @@
 package com.example.financas.auth.controller;
 
-import com.example.financas.auth.entity.dto.LoginDTO;
-import com.example.financas.auth.entity.dto.LoginResponseDTO;
-import com.example.financas.auth.entity.dto.RefreshTokenRequestDTO;
-import com.example.financas.auth.entity.dto.TwoFactorDTO;
+import com.example.financas.auth.entity.dto.*;
 import com.example.financas.auth.service.AuthService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,8 +16,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 public class AuthControllerTest {
 
@@ -94,5 +90,63 @@ public class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(refreshTokenRequest)))
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(loginResponse)));
+    }
+
+    @Test
+    void requestPasswordRecovery_ShouldReturnOk_WhenEmailExists() throws Exception {
+        RecoveryPasswordDTO recoveryPasswordDTO = new RecoveryPasswordDTO("test@example.com");
+
+        mockMvc.perform(post("/auth/request-password-recovery")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(recoveryPasswordDTO)))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Password recovery email sent"));
+
+        Mockito.verify(authService, Mockito.times(1)).forgorPassword(recoveryPasswordDTO.email());
+    }
+
+    @Test
+    void requestPasswordRecovery_ShouldReturnOk_WhenEmailDoesNotExist() throws Exception {
+        RecoveryPasswordDTO recoveryPasswordDTO = new RecoveryPasswordDTO("nonexistent@example.com");
+
+        mockMvc.perform(post("/auth/request-password-recovery")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(recoveryPasswordDTO)))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Password recovery email sent"));
+
+        Mockito.verify(authService, Mockito.times(1)).forgorPassword(recoveryPasswordDTO.email());
+    }
+
+    @Test
+    void resetPassword_ShouldReturnOk_WhenTokenIsValid() throws Exception {
+        ResetPasswordDTO resetPasswordDTO = new ResetPasswordDTO("newPassword123");
+        String token = "validToken";
+
+        mockMvc.perform(post("/auth/reset-password")
+                        .param("token", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(resetPasswordDTO)))
+                .andExpect(status().isOk());
+
+        Mockito.verify(authService, Mockito.times(1)).resetPassword(token, resetPasswordDTO.newPassword());
+    }
+
+    @Test
+    void resetPassword_ShouldReturnBadRequest_WhenTokenIsInvalid() throws Exception {
+        ResetPasswordDTO resetPasswordDTO = new ResetPasswordDTO("newPassword123");
+        String token = "invalidToken";
+
+        Mockito.doThrow(new com.example.financas.exceptions.NotFoundException("Invalid or expired password recovery token"))
+                .when(authService).resetPassword(token, resetPasswordDTO.newPassword());
+
+        mockMvc.perform(post("/auth/reset-password")
+                        .param("token", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(resetPasswordDTO)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Invalid or expired password recovery token")); // 🎯 Ajuste a chave do JSON ("detail" ou "message")
+
+        Mockito.verify(authService, Mockito.times(1)).resetPassword(token, resetPasswordDTO.newPassword());
     }
 }

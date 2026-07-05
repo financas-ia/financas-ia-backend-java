@@ -3,6 +3,7 @@ package com.example.financas.auth.service;
 import com.example.financas.auth.entity.dto.LoginDTO;
 import com.example.financas.auth.entity.dto.LoginResponseDTO;
 import com.example.financas.auth.entity.dto.TwoFactorDTO;
+import com.example.financas.auth.entity.entity.PasswordRecovery;
 import com.example.financas.config.jwt.AcessTokenJwt;
 import com.example.financas.config.jwt.PreAuthTokenJwt;
 import com.example.financas.exceptions.NotFoundException;
@@ -15,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Optional;
 
@@ -37,7 +39,13 @@ class AuthServiceTest {
     private TwoFactorCodeService twoFactorCodeService;
 
     @Mock
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    @Mock
     private RefreshTokenService refreshTokenService;
+
+    @Mock
+    private PasswordRecoveryService passwordRecoveryService;
 
     @Mock
     private UserRepository userRepository;
@@ -149,4 +157,73 @@ class AuthServiceTest {
         // When & Then
         assertThrows(NotFoundException.class, () -> authService.refreshToken("validToken"));
     }
+
+    @Test
+    void forgorPassword_UserExists_ShouldSendRecoveryEmail() {
+        // Given
+        String email = "test@example.com";
+        User user = mock(User.class);
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+        when(passwordRecoveryService.generateRecoveryToken(user)).thenReturn("recoveryToken");
+
+        // When
+        authService.forgorPassword(email);
+
+        // Then
+        verify(passwordRecoveryService).invalidAllTokens(user);
+        verify(passwordRecoveryService).generateRecoveryToken(user);
+        verify(passwordRecoveryService).sendRecoveryEmail(user, "recoveryToken");
+    }
+
+    @Test
+    void forgorPassword_UserDoesNotExist_ShouldDoNothing() {
+        // Given
+        String email = "nonexistent@example.com";
+        when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
+
+        // When
+        authService.forgorPassword(email);
+
+        // Then
+        verify(passwordRecoveryService, never()).invalidAllTokens(any());
+        verify(passwordRecoveryService, never()).generateRecoveryToken(any());
+        verify(passwordRecoveryService, never()).sendRecoveryEmail(any(), any());
+    }
+
+    @Test
+    void resetPassword_ValidToken_ShouldResetPassword() {
+        // Given
+        String token = "validToken";
+        String newPassword = "newPassword123";
+        PasswordRecovery passwordRecovery = mock(PasswordRecovery.class);
+        User user = mock(User.class);
+
+        when(passwordRecoveryService.validateAndGetToken(token)).thenReturn(passwordRecovery);
+        when(passwordRecovery.getUser()).thenReturn(user);
+        when(bCryptPasswordEncoder.encode(newPassword)).thenReturn("hashedPassword");
+
+        // When
+        authService.resetPassword(token, newPassword);
+
+        // Then
+        verify(user).setPassword("hashedPassword");
+        verify(userRepository).save(user);
+        verify(passwordRecoveryService).completeRecovery(passwordRecovery);
+    }
+
+    @Test
+    void resetPassword_InvalidToken_ShouldThrowException() {
+        // Given
+        String token = "invalidToken";
+        String newPassword = "newPassword123";
+        when(passwordRecoveryService.validateAndGetToken(token)).thenThrow(new RuntimeException("Invalid token"));
+
+        // When & Then
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> authService.resetPassword(token, newPassword));
+        assertEquals("Invalid token", exception.getMessage());
+        verify(userRepository, never()).save(any());
+        verify(passwordRecoveryService, never()).completeRecovery(any());
+    }
+
+
 }

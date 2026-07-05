@@ -1,5 +1,6 @@
 package com.example.financas.user.domain.entity;
 
+import com.example.financas.auth.entity.entity.PasswordRecovery;
 import com.example.financas.auth.entity.entity.RefreshToken;
 import com.example.financas.user.domain.enums.RoleUser;
 import jakarta.persistence.*;
@@ -65,13 +66,16 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RefreshToken> tokens = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PasswordRecovery> passwordRecoveries = new ArrayList<>();
+
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     @LastModifiedDate
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    private Instant updatedAt;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
