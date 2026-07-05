@@ -3,16 +3,17 @@ package com.example.financas.auth.service;
 import com.example.financas.auth.entity.dto.LoginDTO;
 import com.example.financas.auth.entity.dto.LoginResponseDTO;
 import com.example.financas.auth.entity.dto.TwoFactorDTO;
+import com.example.financas.auth.entity.entity.PasswordRecovery;
 import com.example.financas.config.jwt.AcessTokenJwt;
 import com.example.financas.config.jwt.PreAuthTokenJwt;
-import com.example.financas.config.jwt.RefreshTokenJwt;
 import com.example.financas.exceptions.NotFoundException;
 import com.example.financas.user.domain.entity.User;
 import com.example.financas.user.repository.UserRepository;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -25,6 +26,8 @@ public class AuthService {
     private final TwoFactorCodeService twoFactorCodeService;
     private final RefreshTokenService refreshTokenService;
     private final UserRepository userRepository;
+    private final PasswordRecoveryService passwordRecoveryService;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     public AuthService(
             AuthenticationManager authenticationManager,
@@ -32,13 +35,17 @@ public class AuthService {
             TwoFactorCodeService twoFactorCodeService,
             PreAuthTokenJwt preAuthTokenJwt,
             RefreshTokenService refreshTokenService,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            PasswordRecoveryService passwordRecoveryService,
+            BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.authenticationManager = authenticationManager;
         this.acessTokenJwt = acessTokenJwt;
         this.preAuthTokenJwt = preAuthTokenJwt;
         this.twoFactorCodeService = twoFactorCodeService;
         this.refreshTokenService = refreshTokenService;
         this.userRepository = userRepository;
+        this.passwordRecoveryService = passwordRecoveryService;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
     public <T> T login(LoginDTO data) {
@@ -95,5 +102,30 @@ public class AuthService {
         this.refreshTokenService.saveRefreshToken(newRefreshToken, user);
         var acessToken = acessTokenJwt.generateToken(email);
         return new LoginResponseDTO(acessToken, newRefreshToken);
+    }
+
+    @Transactional
+    public void forgorPassword(String email) {
+        Optional<User> user = this.userRepository.findByEmail(email);
+        if (user.isEmpty()) {
+            return;
+        }
+
+        User forgotUser = user.get();
+
+        this.passwordRecoveryService.invalidAllTokens(forgotUser);
+        String token = this.passwordRecoveryService.generateRecoveryToken(forgotUser);
+        this.passwordRecoveryService.sendRecoveryEmail(forgotUser, token);
+    }
+
+    @Transactional
+    public void resetPassword(String token, String newPassword) {
+        PasswordRecovery passwordRecovery = this.passwordRecoveryService.validateAndGetToken(token);
+
+        User user = passwordRecovery.getUser();
+        String hashPassword = this.bCryptPasswordEncoder.encode(newPassword);
+        user.setPassword(hashPassword);
+        userRepository.save(user);
+        this.passwordRecoveryService.completeRecovery(passwordRecovery);
     }
 }
