@@ -1,5 +1,5 @@
 services:
-  postgres:
+  db:
     image: postgres:15
     environment:
       POSTGRES_USER: ${DB_USER}
@@ -9,6 +9,35 @@ services:
       - "5434:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready - U ${DB_USER} -d ${DB_HOST}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: ${DB_URL}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+
+      GEMINI_API_KEY: ${GEMINI_KEY}
+
+      acess_jwt_secret: ${acess_jwt_secret}
+      refresh_jwt_secret: ${refresh_jwt_secret}
+      pre_auth_token: ${pre_auth_token}
+
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
+      MAIL_USER: ${MAIL_USER}
+      MAIL_PASS: ${MAIL_PASS}
+    depends_on:
+      db:
+        condition: service_started
 
 volumes:
   pg_data:
