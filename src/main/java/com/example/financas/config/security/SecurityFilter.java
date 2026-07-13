@@ -29,7 +29,6 @@ public class SecurityFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         var token = this.recoverToken(request);
         if (token != null) {
-            System.out.println("se entrou aqui ent tem token ai azeda irmao");
             var email = acessTokenJwt.validadeToken(token);
             if (email != null) {
                 UserDetails user = userDetailsService.loadUserByUsername(email);
@@ -37,7 +36,6 @@ public class SecurityFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication((authentication));
             }
         }
-        System.out.println("se passou aqui perfeito o token é nulo");
         filterChain.doFilter(request, response);
     }
 
