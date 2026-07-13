@@ -1,5 +1,6 @@
 package com.example.financas.user.service;
 
+import com.example.financas.auth.service.AuthService;
 import com.example.financas.exceptions.ConflictException;
 import com.example.financas.exceptions.NotFoundException;
 import com.example.financas.user.domain.dto.CreateUserDTO;
@@ -15,16 +16,17 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuthService authService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthService authService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.authService = authService;
     }
 
     public UserResponseDTO createUser(CreateUserDTO createUserDTO) {
@@ -45,6 +47,7 @@ public class UserService {
         user.setTwoFactorEnabled(false);
         String bcryptPassword = this.passwordEncoder.encode(createUserDTO.password());
         user.setPassword(bcryptPassword);
+        user.setPhotoUrl(null);
 
         User newUser = this.userRepository.save(user);
 
@@ -52,6 +55,7 @@ public class UserService {
     }
 
     public UserResponseDTO getUserById(UUID id) {
+        this.authService.validateUser(id);
         User user = this.userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User not found"));
         return new UserResponseDTO(user);
@@ -64,9 +68,9 @@ public class UserService {
 
     @Transactional
     public UserResponseDTO updateUser(UUID id, UpdateUserDTO data) {
+        this.authService.validateUser(id);
         User user = this.userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User not found"));
-
 
         if (data.email() != null && !data.email().equals(user.getEmail())) {
             if (this.userRepository.existsByEmail(data.email())) {
@@ -93,6 +97,7 @@ public class UserService {
 
     @Transactional
     public void deleteUser(UUID id) {
+        this.authService.validateUser(id);
         if (!this.userRepository.existsById(id)) {
             throw new NotFoundException("User not found");
         }

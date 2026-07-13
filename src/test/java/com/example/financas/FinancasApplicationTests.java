@@ -19,7 +19,11 @@ import org.springframework.boot.test.context.SpringBootTest;
         "acess_jwt_secret=ChaveSecretaSuperSeguraComMaisDe32CaracteresTexto!",
         "refresh_jwt_secret=ChaveSecretaSuperSeguraComMaisDe32CaracteresTextoRefresh!",
         "pre_auth_token=ChaveSecretaSuperSeguraComMaisDe32CaracteresTextoPreAuth!",
-        "GEMINI_API_KEY=mock"
+        "GEMINI_API_KEY=mock",
+
+        "MINIO_URL=http://localhost:9000",
+        "MINIO_ROOT_USER=mock-user",
+        "MINIO_ROOT_PASSWORD=mock-password"
 })
 class FinancasApplicationTests {
 

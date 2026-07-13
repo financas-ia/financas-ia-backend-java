@@ -4,7 +4,7 @@ package com.example.financas.auth.service;
 import com.example.financas.auth.entity.entity.PasswordRecovery;
 import com.example.financas.auth.repository.PasswordRecoveryRepository;
 import com.example.financas.exceptions.NotFoundException;
-import com.example.financas.exceptions.dto.ForbiddenException;
+import com.example.financas.exceptions.ForbiddenException;
 import com.example.financas.mail.MailService;
 import com.example.financas.user.domain.entity.User;
 import org.apache.commons.codec.digest.DigestUtils;

@@ -11,11 +11,14 @@ import com.example.financas.user.domain.entity.User;
 import com.example.financas.user.repository.UserRepository;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.security.access.AccessDeniedException;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class AuthService {
@@ -127,5 +130,16 @@ public class AuthService {
         user.setPassword(hashPassword);
         userRepository.save(user);
         this.passwordRecoveryService.completeRecovery(passwordRecovery);
+    }
+
+    public void validateUser(UUID featId) {
+        User authenticatedUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        boolean isAdmin = authenticatedUser.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        boolean isEqual = authenticatedUser.getId().equals(featId);
+
+        if (!isAdmin || !isEqual) {
+            throw new AccessDeniedException("Acess denied");
+        }
     }
 }
