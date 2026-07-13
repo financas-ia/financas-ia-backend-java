@@ -1,5 +1,6 @@
 package com.example.financas.config.security;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -21,9 +22,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final SecurityFilter securityFilter;
-    private final SecurityFilter preAuthSecurityFilter;
+    private final PreAuthTokenFilter preAuthSecurityFilter;
 
-    public SecurityConfig(SecurityFilter securityFilter, SecurityFilter preAuthSecurityFilter) {
+    public SecurityConfig(SecurityFilter securityFilter, PreAuthTokenFilter preAuthSecurityFilter) {
         this.securityFilter = securityFilter;
         this.preAuthSecurityFilter = preAuthSecurityFilter;
     }
@@ -32,7 +33,7 @@ public class SecurityConfig {
     @Order(1)
     public SecurityFilterChain preAuthSecurityFilterChain(HttpSecurity http) throws Exception {
         return http
-                .securityMatcher("/auth/verify-2fa")
+                .securityMatcher("/auth/verify-2fa", "/auth/verify-2fa/**")
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())

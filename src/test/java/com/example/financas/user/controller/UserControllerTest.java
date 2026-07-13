@@ -1,6 +1,7 @@
 package com.example.financas.user.controller;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -11,6 +12,7 @@ import com.example.financas.exceptions.NotFoundException;
 import com.example.financas.user.domain.dto.CreateUserDTO;
 import com.example.financas.user.domain.dto.UpdateUserDTO;
 import com.example.financas.user.domain.dto.UserResponseDTO;
+import com.example.financas.user.service.SavePhotoService;
 import com.example.financas.user.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,6 +35,9 @@ public class UserControllerTest {
 
     @Mock
     private UserService userService;
+
+    @Mock
+    private SavePhotoService savePhotoService;
 
     @InjectMocks
     private UserController userController;
@@ -210,5 +215,49 @@ public class UserControllerTest {
 
         mockMvc.perform(delete("/users/{id}", userId))
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void uploadPhoto_withValidUserAndFile_shouldReturnOk() throws Exception {
+        UUID userId = UUID.randomUUID();
+        String fakeUrl = "http://localhost:9000/financas-archives/profile-pictures/user_" + userId + "/photo.jpg";
+
+        // Criamos o arquivo fake que simula o upload do Postman
+        org.springframework.mock.web.MockMultipartFile mockFile = new org.springframework.mock.web.MockMultipartFile(
+                "photo",
+                "avatar.jpg",
+                MediaType.IMAGE_JPEG_VALUE,
+                "image-content".getBytes()
+        );
+
+        // Quando o service for chamado, finge que deu bom e retorna a URL
+        when(savePhotoService.updateUserPhoto(eq(userId), any(org.springframework.web.multipart.MultipartFile.class)))
+                .thenReturn(fakeUrl);
+
+        // No Spring, para enviar arquivos em PATCH/PUT via MockMvc, usamos multipart() e setamos o método na requisição
+        mockMvc.perform(multipart("/users/" + userId + "/photo")
+                        .file(mockFile)
+                        .with(request -> { request.setMethod("PATCH"); return request; }))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void uploadPhoto_whenServiceThrowsException_shouldReturnInternalServerError() throws Exception {
+        UUID userId = UUID.randomUUID();
+        org.springframework.mock.web.MockMultipartFile mockFile = new org.springframework.mock.web.MockMultipartFile(
+                "photo",
+                "avatar.jpg",
+                MediaType.IMAGE_JPEG_VALUE,
+                "image-content".getBytes()
+        );
+
+        when(savePhotoService.updateUserPhoto(eq(userId), any(org.springframework.web.multipart.MultipartFile.class)))
+                .thenThrow(new RuntimeException("MinIO connection failed"));
+
+        mockMvc.perform(multipart("/users/" + userId + "/photo")
+                        .file(mockFile)
+                        .with(request -> { request.setMethod("PATCH"); return request; }))
+                .andExpect(status().isInternalServerError())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Error processing photo")));
     }
 }

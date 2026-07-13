@@ -1,5 +1,6 @@
 package com.example.financas.user.service;
 
+import com.example.financas.auth.service.AuthService;
 import com.example.financas.exceptions.ConflictException;
 import com.example.financas.exceptions.NotFoundException;
 import com.example.financas.user.domain.dto.CreateUserDTO;
@@ -7,6 +8,9 @@ import com.example.financas.user.domain.dto.UpdateUserDTO;
 import com.example.financas.user.domain.dto.UserResponseDTO;
 import com.example.financas.user.domain.entity.User;
 import com.example.financas.user.repository.UserRepository;
+import io.minio.BucketExistsArgs;
+import io.minio.MinioClient;
+import io.minio.PutObjectArgs;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
@@ -35,8 +40,17 @@ class UserServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private MinioClient minioClient;
+
+    @Mock
+    private AuthService authService;
+
     @InjectMocks
     private UserService userService;
+
+    @InjectMocks
+    private SavePhotoService savePhotoService;
 
     private UUID userId;
     private User user;
@@ -229,5 +243,49 @@ class UserServiceTest {
         assertEquals("User not found", exception.getMessage());
         verify(userRepository, times(1)).existsById(userId);
         verify(userRepository, never()).deleteById(userId);
+    }
+
+    @Test
+    void updateUserPhoto_Success() throws Exception {
+        // Arrange
+        MockMultipartFile mockFile = new MockMultipartFile(
+                "photo",
+                "profile.png",
+                "image/png",
+                "test-image-bytes".getBytes()
+        );
+
+        // Configura as respostas dos mocks
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(minioClient.bucketExists(any(BucketExistsArgs.class))).thenReturn(false);
+
+        // Act
+        String resultUrl = savePhotoService.updateUserPhoto(userId, mockFile);
+
+        // Assert
+        assertNotNull(resultUrl);
+        assertTrue(resultUrl.contains("http://localhost:9000/financas-archives/profile-pictures/user_" + userId));
+        assertTrue(resultUrl.endsWith(".png"));
+        assertEquals(resultUrl, user.getPhotoUrl()); // Garante que a URL foi atualizada no objeto do usuário
+
+        // Verifica as interações
+        verify(userRepository, times(1)).findById(userId);
+        verify(minioClient, times(1)).makeBucket(any()); // Como bucketExists retornou false, ele TEM que criar o bucket
+        verify(minioClient, times(1)).putObject(any(PutObjectArgs.class));
+        verify(userRepository, times(1)).save(user);
+    }
+
+    @Test
+    void updateUserPhoto_UserNotFound_ShouldThrowNotFoundException() throws Exception {
+        MockMultipartFile mockFile = new MockMultipartFile("photo", "profile.png", "image/png", new byte[]{});
+
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> {
+            savePhotoService.updateUserPhoto(userId, mockFile);
+        });
+
+        verify(minioClient, never()).putObject(any(PutObjectArgs.class));
+        verify(userRepository, never()).save(any(User.class));
     }
 }
