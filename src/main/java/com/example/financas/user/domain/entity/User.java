@@ -1,14 +1,17 @@
 package com.example.financas.user.domain.entity;
 
-import com.example.financas.auth.entity.entity.PasswordRecovery;
-import com.example.financas.auth.entity.entity.RefreshToken;
+import com.example.financas.auth.domain.entity.PasswordRecovery;
+import com.example.financas.auth.domain.entity.RefreshToken;
+import com.example.financas.config.interfaces.UuidV7;
+import com.example.financas.config.interfaces.UuidV7Generator;
 import com.example.financas.user.domain.enums.RoleUser;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.UuidGenerator;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.IdGeneratorType;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -18,7 +21,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -34,8 +36,8 @@ import java.util.UUID;
 public class User implements UserDetails {
 
     @Id
-    @GeneratedValue
-    @UuidGenerator
+    @UuidV7
+    @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
     @Column(unique = true, nullable = false)

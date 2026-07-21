@@ -1,7 +1,7 @@
 package com.example.financas.auth.service;
 
 
-import com.example.financas.auth.entity.entity.PasswordRecovery;
+import com.example.financas.auth.domain.entity.PasswordRecovery;
 import com.example.financas.auth.repository.PasswordRecoveryRepository;
 import com.example.financas.exceptions.NotFoundException;
 import com.example.financas.exceptions.ForbiddenException;

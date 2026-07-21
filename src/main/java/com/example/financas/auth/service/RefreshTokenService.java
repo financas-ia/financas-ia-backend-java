@@ -1,6 +1,6 @@
 package com.example.financas.auth.service;
 
-import com.example.financas.auth.entity.entity.RefreshToken;
+import com.example.financas.auth.domain.entity.RefreshToken;
 import com.example.financas.auth.repository.RefreshTokenRepository;
 import com.example.financas.config.jwt.RefreshTokenJwt;
 import com.example.financas.user.domain.entity.User;

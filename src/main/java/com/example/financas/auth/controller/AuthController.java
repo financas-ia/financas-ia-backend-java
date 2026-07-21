@@ -1,15 +1,10 @@
 package com.example.financas.auth.controller;
 
-import com.example.financas.auth.entity.dto.*;
+import com.example.financas.auth.domain.dto.*;
 import com.example.financas.auth.service.AuthService;
-import com.example.financas.auth.service.TwoFactorCodeService;
-import com.example.financas.config.jwt.PreAuthTokenJwt;
-import com.example.financas.config.jwt.AcessTokenJwt;
 import com.example.financas.user.domain.entity.User;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 

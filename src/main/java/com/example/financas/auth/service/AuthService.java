@@ -1,9 +1,9 @@
 package com.example.financas.auth.service;
 
-import com.example.financas.auth.entity.dto.LoginDTO;
-import com.example.financas.auth.entity.dto.LoginResponseDTO;
-import com.example.financas.auth.entity.dto.TwoFactorDTO;
-import com.example.financas.auth.entity.entity.PasswordRecovery;
+import com.example.financas.auth.domain.dto.LoginDTO;
+import com.example.financas.auth.domain.dto.LoginResponseDTO;
+import com.example.financas.auth.domain.dto.TwoFactorDTO;
+import com.example.financas.auth.domain.entity.PasswordRecovery;
 import com.example.financas.config.jwt.AcessTokenJwt;
 import com.example.financas.config.jwt.PreAuthTokenJwt;
 import com.example.financas.exceptions.NotFoundException;

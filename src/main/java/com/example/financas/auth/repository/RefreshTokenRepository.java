@@ -1,6 +1,6 @@
 package com.example.financas.auth.repository;
 
-import com.example.financas.auth.entity.entity.RefreshToken;
+import com.example.financas.auth.domain.entity.RefreshToken;
 import com.example.financas.user.domain.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
