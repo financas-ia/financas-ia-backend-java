@@ -6,6 +6,7 @@ import com.example.financas.auth.domain.dto.TwoFactorDTO;
 import com.example.financas.auth.domain.entity.PasswordRecovery;
 import com.example.financas.config.jwt.AcessTokenJwt;
 import com.example.financas.config.jwt.PreAuthTokenJwt;
+import com.example.financas.exceptions.ForbiddenException;
 import com.example.financas.exceptions.NotFoundException;
 import com.example.financas.exceptions.dto.BadRequestException;
 import com.example.financas.user.domain.entity.User;
@@ -15,8 +16,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import org.springframework.security.access.AccessDeniedException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -137,7 +136,7 @@ public class AuthService {
         boolean isEqual = authenticatedUser.getId().equals(featId);
 
         if (!isAdmin && !isEqual) {
-            throw new AccessDeniedException("Acess denied");
+            throw new ForbiddenException("Acess denied");
         }
     }
 }
