@@ -54,8 +54,8 @@ public class UserService {
         return new UserResponseDTO(newUser);
     }
 
-    public UserResponseDTO getUserById(UUID id) {
-        this.authService.validateUser(id);
+    public UserResponseDTO getUserById(UUID id, User authenticatedUser) {
+        this.authService.validateUser(id, authenticatedUser);
         User user = this.userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User not found"));
         return new UserResponseDTO(user);
@@ -67,8 +67,8 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponseDTO updateUser(UUID id, UpdateUserDTO data) {
-        this.authService.validateUser(id);
+    public UserResponseDTO updateUser(UUID id, UpdateUserDTO data, User authenticatedUser) {
+        this.authService.validateUser(id, authenticatedUser);
         User user = this.userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
@@ -96,8 +96,8 @@ public class UserService {
     }
 
     @Transactional
-    public void deleteUser(UUID id) {
-        this.authService.validateUser(id);
+    public void deleteUser(UUID id, User user) {
+        this.authService.validateUser(id, user);
         if (!this.userRepository.existsById(id)) {
             throw new NotFoundException("User not found");
         }

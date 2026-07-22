@@ -3,6 +3,7 @@ package com.example.financas.auth.service;
 import com.example.financas.auth.domain.entity.RefreshToken;
 import com.example.financas.auth.repository.RefreshTokenRepository;
 import com.example.financas.config.jwt.RefreshTokenJwt;
+import com.example.financas.exceptions.dto.BadRequestException;
 import com.example.financas.user.domain.entity.User;
 import org.springframework.stereotype.Service;
 
@@ -42,7 +43,7 @@ public class RefreshTokenService {
 
         boolean existsAndValid = this.refreshTokenRepository.existsByTokenAndValidTrue(token);
         if (!existsAndValid) {
-            throw new RuntimeException("Refresh token has been invalidated");
+            throw new BadRequestException("Refresh token has been invalidated");
         }
 
         return email;

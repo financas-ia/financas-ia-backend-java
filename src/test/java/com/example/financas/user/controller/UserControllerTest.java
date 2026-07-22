@@ -4,7 +4,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.example.financas.exceptions.ConflictException;
@@ -12,6 +11,7 @@ import com.example.financas.exceptions.NotFoundException;
 import com.example.financas.user.domain.dto.CreateUserDTO;
 import com.example.financas.user.domain.dto.UpdateUserDTO;
 import com.example.financas.user.domain.dto.UserResponseDTO;
+import com.example.financas.user.domain.entity.User;
 import com.example.financas.user.service.SavePhotoService;
 import com.example.financas.user.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -141,9 +141,10 @@ public class UserControllerTest {
                 LocalDate.of(1990, 1, 1)
         );
 
-        when(userService.getUserById(userId)).thenReturn(userResponseDTO);
+        when(userService.getUserById(eq(userId), any(User.class))).thenReturn(userResponseDTO);
 
-        mockMvc.perform(get("/users/{id}", userId))
+        mockMvc.perform(get("/users/{id}", userId)
+                        .principal(() -> userId.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value(userResponseDTO.email()))
                 .andExpect(jsonPath("$.CPF").value(userResponseDTO.CPF()));
@@ -152,10 +153,13 @@ public class UserControllerTest {
     @Test
     public void getUserById_withInvalidId_shouldReturnNotFound() throws Exception {
         UUID userId = UUID.randomUUID();
+        User user = new User();
+        user.setId(userId);
 
-        when(userService.getUserById(userId)).thenThrow(new NotFoundException("User not found"));
+        when(userService.getUserById(eq(userId), any(User.class))).thenThrow(new NotFoundException("User not found"));
 
-        mockMvc.perform(get("/users/{id}", userId))
+        mockMvc.perform(get("/users/{id}", userId)
+                        .principal(() -> userId.toString()))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("User not found"));
     }
@@ -188,6 +192,9 @@ public class UserControllerTest {
     @Test
     public void updateUser_withValidData_shouldReturnUpdatedUser() throws Exception {
         UUID userId = UUID.randomUUID();
+        User user = new User();
+        user.setId(userId);
+
         UpdateUserDTO updateUserDTO = new UpdateUserDTO("new@example.com", "New Name", null, null);
         UserResponseDTO updatedUser = new UserResponseDTO(
                 userId,
@@ -199,11 +206,12 @@ public class UserControllerTest {
                 LocalDate.of(1990, 1, 1)
         );
 
-        when(userService.updateUser(any(UUID.class), any(UpdateUserDTO.class))).thenReturn(updatedUser);
+        when(userService.updateUser(eq(userId), any(UpdateUserDTO.class), any(User.class))).thenReturn(updatedUser);
 
         mockMvc.perform(patch("/users/{id}", userId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateUserDTO)))
+                        .content(objectMapper.writeValueAsString(updateUserDTO))
+                        .principal(() -> userId.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value(updatedUser.email()))
                 .andExpect(jsonPath("$.name").value(updatedUser.name()));

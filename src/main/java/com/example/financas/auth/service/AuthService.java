@@ -7,11 +7,11 @@ import com.example.financas.auth.domain.entity.PasswordRecovery;
 import com.example.financas.config.jwt.AcessTokenJwt;
 import com.example.financas.config.jwt.PreAuthTokenJwt;
 import com.example.financas.exceptions.NotFoundException;
+import com.example.financas.exceptions.dto.BadRequestException;
 import com.example.financas.user.domain.entity.User;
 import com.example.financas.user.repository.UserRepository;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -76,7 +76,7 @@ public class AuthService {
         boolean isValid = twoFactorCodeService.validTwoFactorCode(user, code);
 
         if (!isValid) {
-            throw new RuntimeException("Invalid two-factor code");
+            throw new BadRequestException("Invalid two-factor code");
         }
 
         this.refreshTokenService.invalidRefreshToken(user);
@@ -89,7 +89,7 @@ public class AuthService {
     public LoginResponseDTO refreshToken(String refreshToken) {
         String email = this.refreshTokenService.validateRefreshToken(refreshToken);
         if (email == null) {
-            throw new RuntimeException("Invalid refresh token");
+            throw new BadRequestException("Invalid Token");
         }
 
         Optional<User> auxUser = this.userRepository.findByEmail(email);
@@ -132,13 +132,11 @@ public class AuthService {
         this.passwordRecoveryService.completeRecovery(passwordRecovery);
     }
 
-    public void validateUser(UUID featId) {
-        User authenticatedUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
+    public void validateUser(UUID featId, User authenticatedUser) {
         boolean isAdmin = authenticatedUser.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
         boolean isEqual = authenticatedUser.getId().equals(featId);
 
-        if (!isAdmin || !isEqual) {
+        if (!isAdmin && !isEqual) {
             throw new AccessDeniedException("Acess denied");
         }
     }

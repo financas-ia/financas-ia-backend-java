@@ -4,7 +4,6 @@ import ai.pluggy.client.PluggyClient;
 import ai.pluggy.client.request.CreateConnectTokenRequest;
 import ai.pluggy.client.response.ConnectTokenResponse;
 import ai.pluggy.client.response.WebhookEventPayload;
-import ai.pluggy.client.response.WebhookEventType;
 import com.example.financas.pluggy.domain.dto.SaveItemDTO;
 import com.example.financas.pluggy.domain.entity.AccountEntity;
 import com.example.financas.pluggy.service.PluggyService;
@@ -18,7 +17,6 @@ import retrofit2.Call;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/pluggy")

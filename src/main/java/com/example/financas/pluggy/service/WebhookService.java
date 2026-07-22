@@ -4,6 +4,7 @@ import ai.pluggy.client.PluggyClient;
 import ai.pluggy.client.response.ItemResponse;
 import ai.pluggy.client.response.TransactionsResponse;
 import com.example.financas.exceptions.NotFoundException;
+import com.example.financas.exceptions.dto.BadRequestException;
 import com.example.financas.pluggy.domain.PluggyCustomV2Api;
 import com.example.financas.pluggy.domain.dto.SaveItemDTO;
 import com.example.financas.pluggy.domain.entity.AccountEntity;
@@ -101,7 +102,7 @@ public class WebhookService {
             var response = v2Api.getTransactionsV2(UUID.fromString(account.getPluggyAcountId())).execute();
 
             if (!response.isSuccessful() || response.body() == null) {
-                throw new RuntimeException("Error to search transactions " + response.code() + " " + response.message());
+                throw new BadRequestException("Error to search transactions " + response.code() + " " + response.message());
             }
 
             var responseBody = response.body();
@@ -131,13 +132,13 @@ public class WebhookService {
 
         if (!response.isSuccessful() || response.body() == null) {
             String errorDetail = response.errorBody() != null ? response.errorBody().string() : "";
-            throw new RuntimeException(response.code() + " " + response.message() + " " + errorDetail);
+            throw new BadRequestException(response.code() + " " + response.message() + " " + errorDetail);
         }
 
         ItemResponse item = response.body();
         String userId = item.getClientUserId();
         if (userId == null) {
-            throw new RuntimeException("UserId is Null");
+            throw new BadRequestException("UserId is Null");
         }
         User user = this.userRepository.findById(UUID.fromString(userId))
                 .orElseThrow(() -> new NotFoundException("Not found User"));
@@ -157,7 +158,7 @@ public class WebhookService {
 
         if (!accounts.isSuccessful() || accounts.body() == null) {
             String errorDetail = accounts.errorBody() != null ? accounts.errorBody().string() : "";
-            throw new RuntimeException(accounts.code() + " " + accounts.message() + " " + errorDetail);
+            throw new BadRequestException(accounts.code() + " " + accounts.message() + " " + errorDetail);
         }
 
         var accountsResp = accounts.body();
@@ -192,7 +193,7 @@ public class WebhookService {
 
             if (!response.isSuccessful() || response.body() == null) {
                 String errorBody = response.errorBody() != null ? response.errorBody().string() : "No details";
-                throw new RuntimeException("Fail to search transactions " + errorBody);
+                throw new BadRequestException("Fail to search transactions " + errorBody);
             }
 
             TransactionsResponse transactionsResp = response.body();
@@ -215,5 +216,4 @@ public class WebhookService {
             this.transactionsRepository.saveAll(novasTransacoes);
         };
     }
-
 }

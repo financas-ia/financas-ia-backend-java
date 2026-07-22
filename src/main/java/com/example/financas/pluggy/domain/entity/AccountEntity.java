@@ -1,5 +1,6 @@
 package com.example.financas.pluggy.domain.entity;
 
+import com.example.financas.config.interfaces.UuidV7;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,7 +24,7 @@ import java.util.UUID;
 public class AccountEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @UuidV7
     private UUID id;
 
     @Column(nullable = false, name = "pluggy_account_id")
