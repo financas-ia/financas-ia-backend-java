@@ -1,4 +1,4 @@
-package com.example.financas.auth.entity.dto;
+package com.example.financas.auth.domain.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

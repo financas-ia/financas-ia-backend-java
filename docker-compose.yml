@@ -17,7 +17,12 @@ services:
       retries: 10
 
   api:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - GITHUB_ACTOR=${GITHUB_ACTOR}
+        - GITHUB_TOKEN=${GITHUB_TOKEN}
     ports:
       - "8080:8080"
     environment:
@@ -39,6 +44,9 @@ services:
       MINIO_URL: http://financas-minio:9000
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+
+      CLIENT_ID: ${CLIENT_ID}
+      CLIENT_SECRET: ${CLIENT_SECRET}
     depends_on:
       db:
         condition: service_started

@@ -1,6 +1,6 @@
 package com.example.financas.auth.controller;
 
-import com.example.financas.auth.entity.dto.*;
+import com.example.financas.auth.domain.dto.*;
 import com.example.financas.auth.service.AuthService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;

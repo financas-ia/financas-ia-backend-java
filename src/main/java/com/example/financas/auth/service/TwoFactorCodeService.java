@@ -1,6 +1,6 @@
 package com.example.financas.auth.service;
 
-import com.example.financas.auth.entity.entity.TwoFactorCode;
+import com.example.financas.auth.domain.entity.TwoFactorCode;
 import com.example.financas.auth.repository.TwoFactorCodeRepository;
 import com.example.financas.exceptions.NotFoundException;
 import com.example.financas.mail.MailService;
@@ -10,8 +10,6 @@ import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 

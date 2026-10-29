@@ -140,7 +140,7 @@ class UserServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
         // Act
-        UserResponseDTO response = userService.getUserById(userId);
+        UserResponseDTO response = userService.getUserById(userId, user);
 
         // Assert
         assertNotNull(response);
@@ -154,7 +154,7 @@ class UserServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         // Act & Assert
-        NotFoundException exception = assertThrows(NotFoundException.class, () -> userService.getUserById(userId));
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> userService.getUserById(userId, user));
         assertEquals("User not found", exception.getMessage());
         verify(userRepository, times(1)).findById(userId);
     }
@@ -184,7 +184,7 @@ class UserServiceTest {
         when(userRepository.save(any(User.class))).thenReturn(user);
 
         // Act
-        UserResponseDTO response = userService.updateUser(userId, updateData);
+        UserResponseDTO response = userService.updateUser(userId, updateData, user);
 
         // Assert
         assertNotNull(response);
@@ -201,7 +201,7 @@ class UserServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         // Act & Assert
-        NotFoundException exception = assertThrows(NotFoundException.class, () -> userService.updateUser(userId, updateData));
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> userService.updateUser(userId, updateData, user));
         assertEquals("User not found", exception.getMessage());
         verify(userRepository, times(1)).findById(userId);
     }
@@ -214,7 +214,7 @@ class UserServiceTest {
         when(userRepository.existsByEmail(updateData.email())).thenReturn(true);
 
         // Act & Assert
-        ConflictException exception = assertThrows(ConflictException.class, () -> userService.updateUser(userId, updateData));
+        ConflictException exception = assertThrows(ConflictException.class, () -> userService.updateUser(userId, updateData, user));
         assertEquals("Email already used", exception.getMessage());
         verify(userRepository, times(1)).findById(userId);
         verify(userRepository, times(1)).existsByEmail(updateData.email());
@@ -226,7 +226,7 @@ class UserServiceTest {
         when(userRepository.existsById(userId)).thenReturn(true);
 
         // Act
-        userService.deleteUser(userId);
+        userService.deleteUser(userId, user);
 
         // Assert
         verify(userRepository, times(1)).existsById(userId);
@@ -239,7 +239,7 @@ class UserServiceTest {
         when(userRepository.existsById(userId)).thenReturn(false);
 
         // Act & Assert
-        NotFoundException exception = assertThrows(NotFoundException.class, () -> userService.deleteUser(userId));
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> userService.deleteUser(userId, user));
         assertEquals("User not found", exception.getMessage());
         verify(userRepository, times(1)).existsById(userId);
         verify(userRepository, never()).deleteById(userId);
